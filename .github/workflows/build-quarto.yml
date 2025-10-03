@@ -30,10 +30,12 @@ jobs:
         
     # Step 3: Install Quarto
     - name: Install Quarto
-      uses: quarto-dev/quarto-actions@v2
-      with:
-        # This installs Quarto and makes it available in the PATH
-        version: latest
+      run: |
+        # Download and install Quarto
+        wget -O quarto-linux-amd64.deb https://github.com/quarto-dev/quarto-cli/releases/download/v1.4.550/quarto-linux-amd64.deb
+        sudo dpkg -i quarto-linux-amd64.deb
+        # Verify installation
+        quarto --version
         
     # Step 4: Cache Quarto dependencies (optional but recommended)
     - name: Cache Quarto dependencies
