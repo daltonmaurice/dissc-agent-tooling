@@ -25,7 +25,7 @@ editor: visual
 
 4.  Provide a working example
 
-## Movitvation
+## Motivations
 
 ![](images/paste-8.png){width="731"}
 
@@ -143,9 +143,7 @@ Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
 
 ## Creating a local MCP server
 
--   Goal is to explore setting up a remove MCP server and connecting to a chatbot on pophive website
-
--   We will build a local instance to show how it works
+-   While the ultimate goal is to explore setting an agentic chatbot on a website, we will build a local instance to show how it works
 
 -   Will rely on the MCP SDK python library - <https://github.com/modelcontextprotocol/python-sdk>
 
@@ -155,7 +153,7 @@ Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
 
 ## Initializing tools
 
--   Next you create function with the \`\@MCP.tool() dectorator
+-   Next you create function with the `@MCP.tool()` decorator
 
 -   The name of the tool and the description are used by the LLM to decide how to use the tool
 
@@ -169,7 +167,11 @@ Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
 
 ![](images/paste-15.png){width="952"}
 
-## Caution everything the MCP server returns consumes tokens
+## Tools 
+
+![](images/paste-19.png){width="559"}
+
+## Everything the MCP server returns consumes tokens
 
 -   returning a native figure was using up all my tokens
 
