@@ -1,5 +1,5 @@
 ---
-title: "Agents tooling under the hood"
+title: "Understanding Agent toolings"
 format:
   revealjs:
     theme: default
@@ -167,7 +167,7 @@ Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
 
 ![](images/paste-15.png){width="952"}
 
-## Tools 
+## Tools
 
 ![](images/paste-19.png){width="559"}
 
