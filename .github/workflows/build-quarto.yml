@@ -24,7 +24,7 @@ jobs:
       
     # Step 2: Set up Python (needed for Quarto and any Python dependencies)
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -37,7 +37,7 @@ jobs:
         
     # Step 4: Cache Quarto dependencies (optional but recommended)
     - name: Cache Quarto dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.quarto
         key: ${{ runner.os }}-quarto-${{ hashFiles('**/*.qmd') }}
@@ -69,7 +69,7 @@ jobs:
         
     # Step 7: Upload the built presentation as an artifact
     - name: Upload presentation artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: quarto-presentation
         path: output/
