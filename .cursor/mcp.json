@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "data-visualization": {
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tasks/data-visualization-mcp/data_viz_server.py",
+        "${workspaceFolder}/data"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/tasks/data-visualization-mcp"
+      }
+    }
+  }
+}

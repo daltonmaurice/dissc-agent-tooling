@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "data-visualization": {
+      "command": "$HOME/git-pub/dissc-agent-tooling/tasks/data-visualization-mcp/venv/bin/python",
+      "args": [
+        "$HOME/git-pub/dissc-agent-tooling/tasks/data-visualization-mcp/data_viz_server.py"
+      ],
+      "cwd": "$HOME/git-pub/dissc-agent-tooling/tasks/data-visualization-mcp",
+      "env": {
+        "DATA_DIR": "$HOME/git-pub/dissc-agent-tooling/data",
+        "OUTPUT_DIR": "$HOME/git-pub/dissc-agent-tooling/output/images"
+      }
+    }
+  }
+}

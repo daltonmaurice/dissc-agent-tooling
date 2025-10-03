@@ -1,0 +1,4 @@
+/.quarto/
+.DS_Store
+
+tasks/data-visualization-mcp/venv

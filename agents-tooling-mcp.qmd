@@ -1,0 +1,226 @@
+---
+title: "Agents tooling under the hood"
+format:
+  revealjs:
+    theme: default
+    incremental: false
+    embed-resources: true
+    self-contained: true
+  beamer:
+    theme: default
+    fontsize: 8pt
+    aspectratio: 169
+    header-includes: |
+      \geometry{margin=0.5in}
+editor: visual
+---
+
+## Goals for today
+
+1.  Understand how Agents use tools
+
+2.  Understand how you can create custom tools for agents
+
+3.  Provide enough information so you can understand what third party tools are doing
+
+4.  Provide a working example
+
+## Movitvation
+
+![](images/paste-8.png){width="731"}
+
+::: footer
+Source: [Korinek (2025)](https://www.aeaweb.org/content/file?id=23290)
+:::
+
+## 📈 Towards Agentic chatbots {.smaller}
+
+![](images/paste-6.png){width="1078"}
+
+::: footer
+Source: [Korinek (2025)](https://www.aeaweb.org/content/file?id=23290)
+:::
+
+## 🤖 Demystifying AI Agents {.smaller}
+
+🔍 What are these new tools?
+
+AI Agents are mostly autonomous systems built on LLMs by giving them access to tools that can:
+
+-   🎯 Manage context, e.g. using memory to keep track of previous steps
+
+-   📝 Create detailed plans
+
+-   🛠️ Use various tools (e.g. web search, code execution, data analysis, write reports) to decide to add context
+
+-   🔄 Execute multi-step tasks
+
+-   Orchestrate tasks between specialized agents
+
+## 👨‍💻 What does using an Agentic Chatbot look like? {.smaller}
+
+![](images/paste-9.png)
+
+::: footer
+Source: [Korinek (2025)](https://www.aeaweb.org/content/file?id=23290)
+:::
+
+## What are tools in the Agent context? {.smaller}
+
+-   Model **Context** Protocal (MCP) were developed by anthropic to provide additional context to the LLM
+
+-   Expose additional information for the LLM to use
+
+-   LLMs discover what tools are available and decide how to use them
+
+    -   Tools should focus on high-level capability that aligns with a user's intent, rather then a thin wrapper for an API
+
+    -   The metadata associated with each tool—its name, title, description, and inputSchema—forms a "semantic contract" which impact how the LLM uses the tool
+
+-   <https://modelcontextprotocol.io/docs/getting-started/intro> the doc site is an excellent place to start and much of the material is pulled from this source
+
+## MCP: Architecture for AI Agents {.smaller}
+
+MCP are made up three parts
+
+1.  MCP Host, this is the interface; e.g. could be a chat interface or code
+
+2.  MCP client: they interact between the LLM and the tools.
+
+3.  MCP server: Tool provides actions and descriptions of capabilities
+
+![](images/paste-1.png){width="709"}
+
+::: footer
+Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
+:::
+
+## Tools calling flow {.smaller}
+
+When you submit a query:
+
+1\. The client gets the list of available tools from the server
+
+2\. Your query is sent to the LLM, lets say Claude, along with tool descriptions
+
+3.  Claude decides which tools (if any) to use
+
+4\. The client executes any requested tool calls through the server
+
+5\. Results are sent back to Claude
+
+6\. Claude provides a natural language response
+
+7\. The response is displayed to you
+
+::: footer
+Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
+:::
+
+## MCP server
+
+![](images/paste-2.png){width="858"}
+
+::: footer
+Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
+:::
+
+## Pophive example, chatting with your data {.smaller}
+
+![](images/paste-16.png){width="767"}
+
+-   Pophive (<https://www.pophive.org/> ) is a website which aggregates real time data and provides some visualization
+-   Exploring adding chatbot to allow bespoke data exploration.
+-   Lots of unknowns for us
+    -   Where do we host server?
+    -   How do we scale appropriately while protecting ourselves from cost?
+    -   Pay per token per user - has the potential to be quite expensive
+-   For today, we will implement a local MCP server that leans on Claude Desktop and provide `tools` and `resources`,eg the data
+
+## Pophive example architecture
+
+![](images/paste-17.png)
+
+## Creating a local MCP server
+
+-   Goal is to explore setting up a remove MCP server and connecting to a chatbot on pophive website
+
+-   We will build a local instance to show how it works
+
+-   Will rely on the MCP SDK python library - <https://github.com/modelcontextprotocol/python-sdk>
+
+## Initialize MCP server
+
+![](images/paste-14.png){width="566"}
+
+## Initializing tools
+
+-   Next you create function with the \`\@MCP.tool() dectorator
+
+-   The name of the tool and the description are used by the LLM to decide how to use the tool
+
+-   Note that the server has access to the data found by DATA_DIR, you could have other connections to data here
+
+![](images/paste-13.png){width="1012"}
+
+## Tooling logic
+
+-   logic looks like a regular python function with context sent back to llm via return statement
+
+![](images/paste-15.png){width="952"}
+
+## Caution everything the MCP server returns consumes tokens
+
+-   returning a native figure was using up all my tokens
+
+-   save to path instead
+
+![](images/paste-18.png)
+
+## Lastly let the host now {.smaller}
+
+Since this example uses Claude Desktop
+
+1.  update the `~/Library/Application Support/Claude/claude_desktop_config.json` file with the following
+
+2.  This gives claude access to a new tool
+
+``` json
+{
+  "mcpServers": {
+    "data-visualization": {
+      "command": "$HOME/git-pub/dissc-agent-tooling/tasks/data-visualization-mcp/venv/bin/python",
+      "args": [
+        "$HOME/git-pub/dissc-agent-tooling/tasks/data-visualization-mcp/data_viz_server.py"
+      ],
+      "cwd": "$HOME/git-pub/dissc-agent-tooling/tasks/data-visualization-mcp",
+      "env": {
+        "DATA_DIR": "$HOME/git-pub/dissc-agent-tooling/data",
+        "OUTPUT_DIR": "$HOME/git-pub/dissc-agent-tooling/output/images"
+      }
+    }
+  }
+}
+```
+
+## MCP for a wider audience
+
+-   Worth mentioning that MCP servers can be hosted
+
+-   Additional security and cost need to be considered
+
+## MCP versus traditional RAG
+
+-   MCP is a way for an LLM to **decide to add** context to a task based on the prompt given
+
+-   RAG is a way to inject context to a task for an LLM to **add context** to a task based on the prompt given
+
+-   MCP is more flexible and can add context in a dynamic way
+
+## Towards modular agents
+
+-   Developing tools for an LLM to use is the first step in developing modular agents
+
+-   Encourage people to think about breaking down tasks into smaller components so both tools and agents can be reused
+
+-   [Agent2Agent communication](https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/) is one way to achieve this, in that it allows you to abstract to the agent level allowing agent to discover what each agent can do
