@@ -1,0 +1,85 @@
+name: Build Quarto Presentation
+
+# This workflow will run when:
+# 1. Code is pushed to the main branch
+# 2. Pull requests are opened or updated
+# 3. The workflow is manually triggered
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual triggering
+
+# Set up the job
+jobs:
+  build:
+    # Run on Ubuntu (most common for GitHub Actions)
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Checkout the repository code
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    # Step 2: Set up Python (needed for Quarto and any Python dependencies)
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    # Step 3: Install Quarto
+    - name: Install Quarto
+      uses: quarto-dev/quarto-actions@v2
+      with:
+        # This installs Quarto and makes it available in the PATH
+        version: latest
+        
+    # Step 4: Cache Quarto dependencies (optional but recommended)
+    - name: Cache Quarto dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.quarto
+        key: ${{ runner.os }}-quarto-${{ hashFiles('**/*.qmd') }}
+        restore-keys: |
+          ${{ runner.os }}-quarto-
+          
+    # Step 5: Install any Python dependencies if needed
+    - name: Install Python dependencies
+      run: |
+        # Install any Python packages that might be needed for your presentation
+        # For example, if you have requirements.txt files
+        if [ -f "tasks/data-visualization-mcp/requirements.txt" ]; then
+          pip install -r tasks/data-visualization-mcp/requirements.txt
+        fi
+        
+    # Step 6: Build the presentation using your Makefile
+    - name: Build Quarto presentation
+      run: |
+        # Make the Makefile executable and run the build
+        chmod +x Makefile
+        make revealjs
+        
+    # Step 6.5: Create index.html for GitHub Pages
+    - name: Create index.html for GitHub Pages
+      run: |
+        # Copy the built presentation to be the main index.html
+        cp output/agents-tooling-mcp.html output/index.html
+        echo "✅ Created index.html for GitHub Pages"
+        
+    # Step 7: Upload the built presentation as an artifact
+    - name: Upload presentation artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: quarto-presentation
+        path: output/
+        retention-days: 30
+        
+    # Step 8: Deploy to GitHub Pages
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./output
+        destination_dir: .
