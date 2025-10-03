@@ -34,7 +34,7 @@ jobs:
           mkdir -p _site
           cp agents-tooling-mcp.html _site/index.html
           cp agents-tooling-mcp.pdf _site/
-          cp -r pics _site/
+          cp -r images _site/
           cp README.md _site/
 
       - name: Deploy to GitHub Pages
