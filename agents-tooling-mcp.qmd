@@ -179,7 +179,7 @@ Source: [MCP](https://github.com/modelcontextprotocol/modelcontextprotocol)
 
 ![](images/paste-18.png)
 
-## Lastly let the host now {.smaller}
+## Lastly, give the host access to the tools {.smaller}
 
 Since this example uses Claude Desktop
 
@@ -210,14 +210,6 @@ Since this example uses Claude Desktop
 -   Worth mentioning that MCP servers can be hosted
 
 -   Additional security and cost need to be considered
-
-## MCP versus traditional RAG
-
--   MCP is a way for an LLM to **decide to add** context to a task based on the prompt given
-
--   RAG is a way to inject context to a task for an LLM to **add context** to a task based on the prompt given
-
--   MCP is more flexible and can add context in a dynamic way
 
 ## Towards modular agents
 

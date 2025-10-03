@@ -1,87 +1,45 @@
-name: Build Quarto Presentation
+name: Publish Quarto Presentation
 
-# This workflow will run when:
-# 1. Code is pushed to the main branch
-# 2. Pull requests are opened or updated
-# 3. The workflow is manually triggered
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
-# Set up the job
 jobs:
-  build:
-    # Run on Ubuntu (most common for GitHub Actions)
+  build-deploy:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
     steps:
-    # Step 1: Checkout the repository code
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    # Step 2: Set up Python (needed for Quarto and any Python dependencies)
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    # Step 3: Install Quarto
-    - name: Install Quarto
-      run: |
-        # Download and install Quarto
-        wget -O quarto-linux-amd64.deb https://github.com/quarto-dev/quarto-cli/releases/download/v1.4.550/quarto-linux-amd64.deb
-        sudo dpkg -i quarto-linux-amd64.deb
-        # Verify installation
-        quarto --version
-        
-    # Step 4: Cache Quarto dependencies (optional but recommended)
-    - name: Cache Quarto dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.quarto
-        key: ${{ runner.os }}-quarto-${{ hashFiles('**/*.qmd') }}
-        restore-keys: |
-          ${{ runner.os }}-quarto-
-          
-    # Step 5: Install any Python dependencies if needed
-    - name: Install Python dependencies
-      run: |
-        # Install any Python packages that might be needed for your presentation
-        # For example, if you have requirements.txt files
-        if [ -f "tasks/data-visualization-mcp/requirements.txt" ]; then
-          pip install -r tasks/data-visualization-mcp/requirements.txt
-        fi
-        
-    # Step 6: Build the presentation using your Makefile
-    - name: Build Quarto presentation
-      run: |
-        # Make the Makefile executable and run the build
-        chmod +x Makefile
-        make revealjs
-        
-    # Step 6.5: Create index.html for GitHub Pages
-    - name: Create index.html for GitHub Pages
-      run: |
-        # Copy the built presentation to be the main index.html
-        cp output/agents-tooling-mcp.html output/index.html
-        echo "✅ Created index.html for GitHub Pages"
-        
-    # Step 7: Upload the built presentation as an artifact
-    - name: Upload presentation artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: quarto-presentation
-        path: output/
-        retention-days: 30
-        
-    # Step 8: Deploy to GitHub Pages
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./output
-        destination_dir: .
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: pre-release
+
+      - name: Install TinyTeX
+        run: |
+          quarto tools install tinytex
+          echo "PATH=$PATH:$HOME/.TinyTeX/bin/x86_64-linux" >> $GITHUB_ENV
+
+      - name: Render Quarto Project
+        shell: bash
+        run: |
+          quarto render agents-tooling-mcp.qmd
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p _site
+          cp agents-tooling-mcp.html _site/index.html
+          cp agents-tooling-mcp.pdf _site/
+          cp -r pics _site/
+          cp README.md _site/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages
