@@ -1,5 +1,7 @@
 ---
 title: "Understanding Agent toolings"
+author: "Maurice Dalton"
+institute: "DISSC / Tobin Center"
 format:
   revealjs:
     theme: default
